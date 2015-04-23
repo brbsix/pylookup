@@ -201,6 +201,8 @@ class Rebuild:
         self.check()
         self.prepare()
 
+        original_perms = os.stat(__file__).st_mode
+
         try:
             self.backup()
             self.writetofile()
@@ -211,6 +213,26 @@ class Rebuild:
             sys.exit(1)
 
         self.finish()
+
+        current_perms = os.stat(__file__).st_mode
+
+        fatalities = []
+
+        try:
+            assert original_perms == current_perms
+        except AssertionError:
+            fatalities.append("Failed to restore permissions for '%s'" % __file__)
+
+        try:
+            assert not os.path.isfile(__file__ + '.bak')
+        except AssertionError:
+            fatalities.append("Failed to remove backup file '%s' after rebuild" % __file__ + '.bak')
+
+        if fatalities:
+            for msg in fatalities:
+                error(msg)
+            sys.exit(1)
+
         sys.exit(0)
 
     def backup(self):
@@ -219,6 +241,8 @@ class Rebuild:
 
         if not os.path.isfile(__file__ + '.bak'):
             fatal("Unable to create backup file '%s' prior to rebuild" % __file__ + '.bak')
+        elif os.path.isfile(__file__):
+            fatal("Unable to move '%s' prior to rebuild" % __file__)
 
     def check(self):
         """Check whether a rebuild is necessary."""
@@ -239,7 +263,7 @@ class Rebuild:
     def exception(self):
         """Restore files to their original state in the event of an exception."""
 
-        error("Failed to rebuild '%s'" % __file__)
+        error("Rebuild of '%s' failed..." % __file__)
 
         # check if backup exists and restore it if so
         if os.path.isfile(__file__ + '.bak'):
@@ -263,7 +287,7 @@ class Rebuild:
             self.replacement = pattern.sub('MSGLIST = {\n%s\n}' % self.data, original)
 
         if self.replacement == original:
-            fatal("Unable to rebuild '%s'... Is the file damaged?" % __file__)
+            fatal("Rebuild failed... '%s' may be damaged" % __file__)
 
     def writetofile(self):
         from tempfile import NamedTemporaryFile
@@ -306,98 +330,98 @@ def move(origin, destination):
     """Move file."""
     execute("mv '{0}' '{1}' &>/dev/null || sudo mv '{0}' '{1}' &>/dev/null".format(origin, destination))
 
-def rebuild():
-    import os
-    import re
-    import tempfile
-    import subprocess
+# def rebuild():
+#     import os
+#     import re
+#     import tempfile
+#     import subprocess
 
-    command = """pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf ".%s.:.%s.,\\n", msg, id }' | sort | tr . \\' | sed '$ s/,//'"""
+#     command = """pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf ".%s.:.%s.,\\n", msg, id }' | sort | tr . \\' | sed '$ s/,//'"""
 
-    process = subprocess.Popen(command, executable='bash', 
-                                        shell=True,
-                                        stderr=subprocess.PIPE,
-                                        stdout=subprocess.PIPE)
+#     process = subprocess.Popen(command, executable='bash',
+#                                         shell=True,
+#                                         stderr=subprocess.PIPE,
+#                                         stdout=subprocess.PIPE)
 
-    data = process.stdout.read().decode().strip()
+#     data = process.stdout.read().decode().strip()
 
-    if not data:
-        fatal('Unable to acquire messages necessary to rebuild')
+#     if not data:
+#         fatal('Unable to acquire messages necessary to rebuild')
 
-    exec('NEW_MSGLIST = {' + data + '}')
+#     exec('NEW_MSGLIST = {' + data + '}')
 
-    if eval('MSGLIST == NEW_MSGLIST'):
-        print('INFO: Already up to date')
-        sys.exit(0)
+#     if eval('MSGLIST == NEW_MSGLIST'):
+#         print('INFO: Already up to date')
+#         sys.exit(0)
 
-    print('INFO: Rebuilding list now')
+#     print('INFO: Rebuilding list now')
 
-    pattern = re.compile(r'^MSGLIST = {[^{^]*}', re.MULTILINE)
+#     pattern = re.compile(r'^MSGLIST = {[^{^]*}', re.MULTILINE)
 
-    with open(__file__, 'rU') as self:
-        original = self.read()
-        replacement = pattern.sub('MSGLIST = {\n%s\n}' % data, original)
+#     with open(__file__, 'rU') as self:
+#         original = self.read()
+#         replacement = pattern.sub('MSGLIST = {\n%s\n}' % data, original)
 
-    if replacement == original:
-        fatal("Unable to rebuild '%s'... Is the file damaged?" % __file__)
+#     if replacement == original:
+#         fatal("Unable to rebuild '%s'... Is the file damaged?" % __file__)
 
-    # create a backup
-    subprocess.check_output("mv '{0}' '{0}.bak' &>/dev/null || sudo mv '{0}' '{0}.bak' &>/dev/null".format(__file__),
-                            executable='bash',
-                            shell=True)
+#     # create a backup
+#     subprocess.check_output("mv '{0}' '{0}.bak' &>/dev/null || sudo mv '{0}' '{0}.bak' &>/dev/null".format(__file__),
+#                             executable='bash',
+#                             shell=True)
 
-    # ensure backup was created
-    if not os.path.isfile(__file__ + '.bak'):
-        fatal("Unable to create backup file '%s' prior to rebuild" % __file__ + '.bak')
+#     # ensure backup was created
+#     if not os.path.isfile(__file__ + '.bak'):
+#         fatal("Unable to create backup file '%s' prior to rebuild" % __file__ + '.bak')
 
-    try:
-        # create a temp file
-        tf = tempfile.NamedTemporaryFile()
+#     try:
+#         # create a temp file
+#         tf = tempfile.NamedTemporaryFile()
 
-        # write data to temp file
-        tf.write(replacement.encode())
+#         # write data to temp file
+#         tf.write(replacement.encode())
 
-        # ensure all data is written to temp file
-        tf.flush()
+#         # ensure all data is written to temp file
+#         tf.flush()
 
-        filewriter = """cat '{1}' | tee '{0}' &>/dev/null || cat '{1}' | sudo tee '{0}' &>/dev/null""".format(__file__, tf.name)
+#         filewriter = """cat '{1}' | tee '{0}' &>/dev/null || cat '{1}' | sudo tee '{0}' &>/dev/null""".format(__file__, tf.name)
 
-        # write data to file
-        subprocess.check_output(filewriter,
-                                executable='bash',
-                                shell=True)
-    finally:
-        tf.close()
+#         # write data to file
+#         subprocess.check_output(filewriter,
+#                                 executable='bash',
+#                                 shell=True)
+#     finally:
+#         tf.close()
 
-    # check if file does not exist or is zero in size
-    if not os.path.isfile(__file__) or os.path.getsize(__file__) == 0:
+#     # check if file does not exist or is zero in size
+#     if not os.path.isfile(__file__) or os.path.getsize(__file__) == 0:
 
-        error("Failed to rebuild '%s'" % __file__)
+#         error("Failed to rebuild '%s'" % __file__)
 
-        # delete empty file if it exists
-        if os.path.isfile(__file__):
-            subprocess.check_output("rm -f '{0}' &>/dev/null || sudo rm -f '{0}' &>/dev/null".format(__file__),
-                                    executable='bash',
-                                    shell=True)
+#         # delete empty file if it exists
+#         if os.path.isfile(__file__):
+#             subprocess.check_output("rm -f '{0}' &>/dev/null || sudo rm -f '{0}' &>/dev/null".format(__file__),
+#                                     executable='bash',
+#                                     shell=True)
 
-        # restore file from backup
-        subprocess.check_output("mv '{0}.bak' '{0}' &>/dev/null || sudo mv '{0}.bak' '{0}' &>/dev/null".format(__file__),
-                                executable='bash',
-                                shell=True)
+#         # restore file from backup
+#         subprocess.check_output("mv '{0}.bak' '{0}' &>/dev/null || sudo mv '{0}.bak' '{0}' &>/dev/null".format(__file__),
+#                                 executable='bash',
+#                                 shell=True)
 
-        sys.exit(1)
+#         sys.exit(1)
 
-    # set permissions using backup as a reference
-    subprocess.check_output("chmod --reference='{0}.bak' '{0}' &>/dev/null || sudo chmod --reference='{0}.bak' '{0}' &>/dev/null".format(__file__),
-                            executable='bash',
-                            shell=True)
+#     # set permissions using backup as a reference
+#     subprocess.check_output("chmod --reference='{0}.bak' '{0}' &>/dev/null || sudo chmod --reference='{0}.bak' '{0}' &>/dev/null".format(__file__),
+#                             executable='bash',
+#                             shell=True)
 
-    # remove the backup
-    subprocess.check_output("rm -f '{0}.bak' &>/dev/null || sudo rm -f '{0}.bak' &>/dev/null".format(__file__),
-                            executable='bash',
-                            shell=True)
+#     # remove the backup
+#     subprocess.check_output("rm -f '{0}.bak' &>/dev/null || sudo rm -f '{0}.bak' &>/dev/null".format(__file__),
+#                             executable='bash',
+#                             shell=True)
 
-    sys.exit(0)
+#     sys.exit(0)
 
 def remove(path):
     """Remove file."""
