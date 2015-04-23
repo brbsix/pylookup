@@ -7,6 +7,16 @@
 # LOADER='fresh'
 LOADER='list'
 
+cleanup(){
+    if [[ -f ${0}.bak ]]; then
+        if [[ -f $0 ]]; then
+            rm "$0" &>/dev/null || sudo rm "$0" &>/dev/null
+        fi
+        mv "${0}.bak" "$0" &>/dev/null || sudo mv "${0}.bak" "$0" &>/dev/null
+    fi
+    exit 1
+}
+
 content(){
 cat <<-EOF
 abstract-class-instantiated:E0110
@@ -193,11 +203,6 @@ error(){
     echo "ERROR: $@" >&2
 }
 
-fatal(){
-    error "$@"
-    exit 1
-}
-
 query(){
     if [[ $LOADER = fresh ]]; then
         local content=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
@@ -231,7 +236,8 @@ rebuild(){
     local insert=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
 
     if [[ -z $insert ]]; then
-        fatal "Unable to acquire messages necessary to rebuild"
+        error "Unable to acquire messages necessary to rebuild"
+        return 1
     elif [[ $insert = $(content) ]]; then
         echo "INFO: Already up to date"
         exit 0
@@ -243,49 +249,67 @@ rebuild(){
     fi
 
     local command=$(cat <<-EOF
-	sed -n '1h; 1!H; \${;g;s/cat <<-EOF\n[^}\^]*EOF/cat <<-EOF\n$(tr '\n' '@' <<<"$insert" | sed 's/@/\\n/g')EOF/p;}' "$1"
+	sed -n '1h; 1!H; \${;g;s/cat <<-EOF\n[^}\^]*EOF/cat <<-EOF\n$(tr '\n' '@' <<<"$insert" | sed 's/@/\\n/g')EOF/p;}' "$0"
 	EOF
     )
 
     result=$(eval "$command")
 
     if [[ -z $result ]]; then
-        fatal "Unable to rebuild '$1'... Is the file damaged?"
+        error "Rebuild failed... '$0' may be damaged"
+        return 1
     fi
 
     # create a backup
-    mv "$1" "${1}.bak" &>/dev/null || sudo mv "$1" "${1}.bak" &>/dev/null
+    mv "$0" "${0}.bak" &>/dev/null || sudo mv "$0" "${0}.bak" &>/dev/null
 
     # ensure backup was created
-    if [[ ! -f ${1}.bak ]]; then
-        fatal "Unable to create backup file '$1' prior to rebuild"
+    if [[ ! -f ${0}.bak ]]; then
+        error "Unable to create backup file '${0}.bak' prior to rebuild"
+        return 1
+    elif [[ -f $0 ]]; then
+        error "Unable to move '$0' prior to rebuild"
+        return 1
     fi
 
     # write data to file
-    echo "$result" | tee "$1" &>/dev/null || echo "$result" | sudo tee "$1" &>/dev/null
+    echo "$result" | tee "$0" &>/dev/null || echo "$result" | sudo tee "$0" &>/dev/null
 
     # check if file does not exist or is zero in size
-    if [[ ! -s "$1" ]]; then
-
-        error "Failed to rebuild '$1'"
+    if [[ ! -s "$0" ]]; then
 
         # delete empty file if it exists
-        if [[ -f "$1" ]]; then
-            rm -f "$1" &>/dev/null || sudo rm -f "$1" &>/dev/null
+        if [[ -f "$0" ]]; then
+            error "Rebuild failed... '$0' is empty"
+            rm -f "$0" &>/dev/null || sudo rm -f "$0" &>/dev/null
+        else
+            error "Rebuild failed... '$0' does not exist"
         fi
 
         # restore file from backup
-        mv "${1}.bak" "$1" &>/dev/null || sudo mv "${1}.bak" "$1" &>/dev/null
+        mv "${0}.bak" "$0" &>/dev/null || sudo mv "${0}.bak" "$0" &>/dev/null
 
-        exit 1
+        return 1
 
     fi
 
     # set permissions using backup as a reference
-    chmod --reference="${1}.bak" "$1" &>/dev/null || sudo chmod --reference="${1}.bak" "$1" &>/dev/null
+    chmod --reference="${0}.bak" "$0" &>/dev/null || sudo chmod --reference="${0}.bak" "$0" &>/dev/null
+
+    # verify permissions
+    if [[ $(stat --format=%a "$0") != $(stat --format=%a "${0}.bak") ]]; then
+        error "Failed to restore permissions for '$0'"
+        return 1
+    fi
 
     # remove the backup
-    rm -f "${1}.bak" &>/dev/null || sudo rm -f "${1}.bak" &>/dev/null
+    rm -f "${0}.bak" &>/dev/null || sudo rm -f "${0}.bak" &>/dev/null
+
+    # verify removal of backup
+    if [[ -f "${0}.bak" ]]; then
+        error "Failed to remove backup file '{0}.bak'"
+        return 1
+    fi
 
     exit 0
 }
@@ -316,7 +340,7 @@ for arg in "$@"; do
         case $arg in
             -b|--bare) bare='true'; ;;
             -h|--help) usage; ;;
-            --rebuild) rebuild "$0"; ;;
+            --rebuild) rebuild || cleanup; ;;
             --) last='true'; ;;
         esac
     fi
