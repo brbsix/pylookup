@@ -267,28 +267,3 @@ fi
 load
 
 query "${msgs[@]}"
-
-
-# if [[ $bare = 'true' ]]; then
-#     printstr='print $2'
-# else
-#     printstr='printf "# pylint: disable=%s\n", $2'
-# fi
-
-# output=$(eval "echo -n '${msgs[@]}' | xargs -d' ' -I% -r -- pylint --help-msg=% 2>/dev/null | awk -F '[()]' '/^:/ { $printstr }'")
-
-# if [[ -n $output ]]; then
-#     echo "$output"
-# else
-#     exit 1
-# fi
-
-# if [[ $bare = 'true' ]]; then
-#     echo -n "${msgs[@]}" | xargs -d' ' -I% -r -- pylint --help-msg=% 2>/dev/null | grep -oP '(?<=\()[A-Z][0-9]{4}(?=\))'
-#     echo -n "${msgs[@]}" | xargs -d' ' -I% -r -- pylint --help-msg=% 2>/dev/null | awk 'match($0, /^:.+ \((.+)\): .+/, a) {print a[1]}'
-#     echo -n "${msgs[@]}" | xargs -d' ' -I% -r -- pylint --help-msg=% 2>/dev/null | awk -F '[()]' '/^:/ { print $2 }'
-# else
-#     echo -n "${msgs[@]}" | xargs -d' ' -I% -r -- pylint --help-msg=% 2>/dev/null | grep -oP '(?<=\()[A-Z][0-9]{4}(?=\))' | xargs -I% -r -- echo '# pylint: disable=%'
-#     echo -n "${msgs[@]}" | xargs -d' ' -I% -r -- pylint --help-msg=% 2>/dev/null | awk 'match($0, /^:.+ \((.+)\): .+/, a) {printf "# pylint: disable=%s\n", a[1]}'
-#     echo -n "${msgs[@]}" | xargs -d' ' -I% -r -- pylint --help-msg=% 2>/dev/null | awk -F '[()]' '/^:/ { printf "# pylint: disable=%s\n", $2 }'
-# fi
