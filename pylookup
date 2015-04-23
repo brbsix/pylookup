@@ -197,7 +197,7 @@ query(){
     fi
 
     for arg in "$@"; do
-        local value=$(awk -F: "/^$arg:/ { print \$1 }" <<<"$content")
+        local value=$(awk -F: "/^$arg:/ { print \$2 }" <<<"$content")
         if [[ -n $value ]]; then
             if [[ $bare = 'true' ]]; then
                 results+=("$value")
