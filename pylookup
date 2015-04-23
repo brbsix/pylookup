@@ -207,9 +207,13 @@ query(){
         fi
     done
 
-    if (( ${#results[@]} > 0 )); then
-        printf '%s\n' "${results[@]}"
-    else
+    if (( ${#results[@]} == 0 )); then
+        exit 1
+    fi
+
+    printf '%s\n' "${results[@]}"
+
+    if (( ${#results[@]} < ${#msgs[@]} )); then
         exit 1
     fi
 }
