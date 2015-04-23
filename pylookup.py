@@ -2,9 +2,9 @@
 
 """Display the pylint message id for a given message name"""
 
-
 __program__ = 'pylookup'
 __description__ = 'Display the pylint message id for a given message name.'
+
 
 # pylint --list-msgs 2>/dev/null | awk -F '[()]' $'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf "\'%s\':\'%s\',\\n", msg, id }' | sort | sed '$ s/,$//'
 MSGLIST = {
@@ -203,16 +203,15 @@ if __name__ == '__main__':
         dest='bare',
         help='display the message id ONLY')
     parser.add_argument(
-        "-h", "--help",
-        action="help",
+        '-h', '--help',
+        action='help',
         help=argparse.SUPPRESS)
     parser.add_argument(
-        action="append",
-        dest="msgnames",
+        action='append',
+        dest='msgnames',
         help=argparse.SUPPRESS,
-        nargs="*")
+        nargs='*')
     options = parser.parse_args()
-    bare = options.bare
     msgnames = options.msgnames[0]
 
     if len(msgnames) == 0:
@@ -220,18 +219,13 @@ if __name__ == '__main__':
         print("Try '%s --help' for more information." % __program__, file=sys.stderr)
         sys.exit(1)
 
-    results = []
-    for msgname in msgnames:
-        try:
-            results.append(MSGLIST[msgname])
-        except KeyError:
-            pass
+    results = [MSGLIST[m] for m in msgnames if MSGLIST.__contains__(m)]
 
     if len(results) == 0:
         sys.exit(1)
 
     for result in results:
-        if bare:
+        if options.bare:
             print(result)
         else:
             print('# pylint: disable=%s' % result)
