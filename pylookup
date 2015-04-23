@@ -189,6 +189,15 @@ yield-outside-function:E0105
 EOF
 }
 
+error(){
+    echo "ERROR: $@" >&2
+}
+
+fatal(){
+    error "$@"
+    exit 1
+}
+
 query(){
     if [[ $LOADER = fresh ]]; then
         local content=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
@@ -218,17 +227,81 @@ query(){
     fi
 }
 
+rebuild(){
+    local insert=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
+
+    if [[ -z $insert ]]; then
+        fatal "Unable to acquire messages necessary to rebuild"
+    elif [[ $insert = $(content) ]]; then
+        echo "INFO: Already up to date"
+        exit 0
+    else
+        echo "INFO: Rebuilding list now"
+        echo
+        diff <(echo "$insert") <(content)
+        echo
+    fi
+
+    local command=$(cat <<-EOF
+	sed -n '1h; 1!H; \${;g;s/cat <<-EOF\n[^}\^]*EOF/cat <<-EOF\n$(tr '\n' '@' <<<"$insert" | sed 's/@/\\n/g')EOF/p;}' "$1"
+	EOF
+    )
+
+    result=$(eval "$command")
+
+    if [[ -z $result ]]; then
+        fatal "Unable to rebuild '$1'... Is the file damaged?"
+    fi
+
+    # create a backup
+    mv "$1" "${1}.bak" &>/dev/null || sudo mv "$1" "${1}.bak" &>/dev/null
+
+    # ensure backup was created
+    if [[ ! -f ${1}.bak ]]; then
+        fatal "Unable to create backup file '$1' prior to rebuild"
+    fi
+
+    # write data to file
+    echo "$result" | tee "$1" &>/dev/null || echo "$result" | sudo tee "$1" &>/dev/null
+
+    # check if file does not exist or is zero in size
+    if [[ ! -s "$1" ]]; then
+
+        error "Failed to rebuild '$1'"
+
+        # delete empty file if it exists
+        if [[ -f "$1" ]]; then
+            rm -f "$1" &>/dev/null || sudo rm -f "$1" &>/dev/null
+        fi
+
+        # restore file from backup
+        mv "${1}.bak" "$1" &>/dev/null || sudo mv "${1}.bak" "$1" &>/dev/null
+
+        exit 1
+
+    fi
+
+    # set permissions using backup as a reference
+    chmod --reference="${1}.bak" "$1" &>/dev/null || sudo chmod --reference="${1}.bak" "$1" &>/dev/null
+
+    # remove the backup
+    rm -f "${1}.bak" &>/dev/null || sudo rm -f "${1}.bak" &>/dev/null
+
+    exit 0
+}
+
 usage(){
     echo "Usage: ${0##*/} MSGNAME"
     echo
     echo "  -b, --bare             display the message id ONLY"
+    echo "      --rebuild          rebuild the message list"
     echo
     echo "Lookup pylint message id for a given message name."
     exit 0
 }
 
 
-params=$(getopt -l 'bare,help' -o 'b,h' -n "${0}" -- "$@")
+params=$(getopt -l 'bare,help,rebuild' -o 'b,h' -n "${0}" -- "$@")
 
 if (( $? != 0 )); then
     exit 1
