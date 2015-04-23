@@ -189,29 +189,15 @@ content(){
 	EOF
 }
 
-load(){
+query(){
     if [[ $LOADER = fresh ]]; then
-        local string="pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=\":\" } /^:/ { match(\$1, /^:(.+) /, a); msg=a[1]; id=\$2; print msg, id }' | sort"
+        local content=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
     elif [[ $LOADER = list ]]; then
-        local string='content'
+        local content=$(content)
     fi
 
-    declare -Ag msglist
-    while IFS= read -r line; do
-        msglist["${line%:*}"]="${line#*:}"
-    done < <(eval "$string")
-}
-
-# load(){
-#     declare -Ag msglist
-#     while IFS= read -r line; do
-#         msglist["${line%:*}"]="${line#*:}"
-#     done < <(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
-# }
-
-query(){
     for arg in "$@"; do
-        local value=${msglist["$arg"]}
+        local value=$(awk -F: "/^$arg:/ { print \$1 }" <<<"$content")
         if [[ -n $value ]]; then
             if [[ $bare = 'true' ]]; then
                 results+=("$value")
@@ -263,7 +249,5 @@ if (( ${#msgs[@]} == 0 )); then
     echo "Try '${0##*/} --help' for more information."
     exit 1
 fi
-
-load
 
 query "${msgs[@]}"
