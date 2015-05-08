@@ -445,14 +445,14 @@ if __name__ == '__main__':
         dest='bare',
         help='display the message id ONLY')
     parser.add_argument(
+        '-h', '--help',
+        action='help',
+        help=argparse.SUPPRESS)
+    parser.add_argument(
         '--rebuild',
         action='store_true',
         dest='rebuild',
         help='rebuild the message list')
-    parser.add_argument(
-        '-h', '--help',
-        action='help',
-        help=argparse.SUPPRESS)
     parser.add_argument(
         action='append',
         dest='msgnames',
