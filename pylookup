@@ -315,7 +315,7 @@ rebuild(){
 }
 
 usage(){
-    echo "Usage: ${0##*/} MSGNAME"
+    echo "Usage: $PROGRAM MSGNAME"
     echo
     echo "  -b, --bare             display the message id ONLY"
     echo "      --rebuild          rebuild the message list"
@@ -325,6 +325,7 @@ usage(){
 }
 
 
+PROGRAM=${0##*/}
 params=$(getopt -l 'bare,help,rebuild' -o 'b,h' -n "${0}" -- "$@") || exit 1
 
 eval set -- "$params"
@@ -343,8 +344,8 @@ for arg in "$@"; do
 done
 
 if (( ${#msgs[@]} == 0 )); then
-    echo "${0##*/}: missing operand" >&2
-    echo "Try '${0##*/} --help' for more information." >&2
+    echo "$PROGRAM: missing operand" >&2
+    echo "Try '$PROGRAM --help' for more information." >&2
     exit 1
 fi
 
