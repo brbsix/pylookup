@@ -187,8 +187,7 @@ _pylookup(){
 	EOF
     )
 
-    COMPREPLY=()
-    COMPREPLY=( $(compgen -W "$msgs" -- "${COMP_WORDS[COMP_CWORD]}") )
+    COMPREPLY=( $( compgen -W "$msgs" -- "${COMP_WORDS[COMP_CWORD]}" ) )
 }
 
 complete -F _pylookup pylookup
