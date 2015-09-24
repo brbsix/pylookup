@@ -18,7 +18,7 @@ cleanup(){
 }
 
 content(){
-cat <<-EOF
+cat <<EOF
 abstract-class-instantiated:E0110
 abstract-class-little-used:R0922
 abstract-class-not-used:R0921
@@ -204,16 +204,20 @@ error(){
 }
 
 query(){
+    local arg content results value
     if [[ $LOADER = fresh ]]; then
-        local content=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
+        content=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
     elif [[ $LOADER = list ]]; then
-        local content=$(content)
+        content=$(content)
+    else
+        error "Invalid LOADER configuration (update value in $0)"
+        return 1
     fi
 
     for arg in "$@"; do
-        local value=$(awk -F: "/^$arg:/ { print \$2 }" <<<"$content")
+        value=$(awk -F: "/^$arg:/ { print \$2 }" <<<"$content")
         if [[ -n $value ]]; then
-            if [[ $bare = 'true' ]]; then
+            if (( bare == 1 )); then
                 results+=("$value")
             else
                 results+=("# pylint: disable=$value")
@@ -222,18 +226,20 @@ query(){
     done
 
     if (( ${#results[@]} == 0 )); then
-        exit 1
+        return 1
     fi
 
     printf '%s\n' "${results[@]}"
 
     if (( ${#results[@]} < ${#msgs[@]} )); then
-        exit 1
+        return 1
     fi
 }
 
 rebuild(){
-    local insert=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
+    local cmd insert result
+
+    insert=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
 
     if [[ -z $insert ]]; then
         error "Unable to acquire messages necessary to rebuild"
@@ -248,12 +254,12 @@ rebuild(){
         echo
     fi
 
-    local command=$(cat <<-EOF
+    cmd=$(cat <<-EOF
 	sed -n '1h; 1!H; \${;g;s/cat <<-EOF\n[^}\^]*EOF/cat <<-EOF\n$(tr '\n' '@' <<<"$insert" | sed 's/@/\\n/g')EOF/p;}' "$0"
 	EOF
     )
 
-    result=$(eval "$command")
+    result=$(eval "$cmd")
 
     if [[ -z $result ]]; then
         error "Rebuild failed... '$0' may be damaged"
@@ -330,15 +336,17 @@ params=$(getopt -l 'bare,help,rebuild' -o 'b,h' -n "${0}" -- "$@") || exit 1
 
 eval set -- "$params"
 
+bare=0 last=0 msgs=()
+
 for arg in "$@"; do
-    if [[ $last = 'true' ]]; then
+    if (( last == 1 )); then
         msgs+=("$arg")
     else
         case $arg in
-            -b|--bare) bare='true'; ;;
+            -b|--bare) bare=1; ;;
             -h|--help) usage; ;;
             --rebuild) rebuild || cleanup; ;;
-            --) last='true'; ;;
+            --) last=1; ;;
         esac
     fi
 done
