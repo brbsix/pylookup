@@ -265,7 +265,9 @@ class RebuildClass:
     def check(self):
         """Check whether a rebuild is necessary."""
 
-        command = """pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf "    .%s.: .%s.,\\n", msg, id }' | sort | tr . \\' | sed '$ s/,//'"""
+        postfix = """ --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf "    .%s.: .%s.,\\n", msg, id }' | sort | tr . \\' | sed '$ s/,//'"""
+
+        command = get_pylint + postfix
 
         self.data = subprocess.check_output(command,
                                             executable='bash',
@@ -301,6 +303,20 @@ class RebuildClass:
 
         # remove the backup
         remove(__file__ + self.bak)
+
+    @property
+    def get_pylint(self):
+        from distutils.spawn import find_executable
+
+        if find_executable('pylint'):
+            return 'pylint'
+        elif find_executable('pylint3'):
+            return 'pylint3'
+        elif find_executable('pylint2'):
+            return 'pylint2'
+        else:
+            logging.fatal("pylint is not installed")
+            sys.exit(1)
 
     def prepare(self):
         import re

@@ -203,10 +203,15 @@ error(){
     echo "ERROR: $@" >&2
 }
 
+generate(){
+    "$PYLINT" --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort
+}
+
 query(){
     local arg output results value
     if [[ $LOADER = fresh ]]; then
-        output=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
+        requirements
+        output=$(generate)
     elif [[ $LOADER = list ]]; then
         output=$(content)
     else
@@ -244,7 +249,8 @@ query(){
 rebuild(){
     local cmd insert result
 
-    insert=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
+    requirements
+    insert=$(generate)
 
     if [[ -z $insert ]]; then
         error "Unable to acquire messages necessary to rebuild"
@@ -328,6 +334,13 @@ rebuild(){
     exit 0
 }
 
+requirements(){
+    if [[ -z $PYLINT ]]; then
+        error "pylint is not installed (unable to continue)"
+        exit 1
+    fi
+}
+
 usage(){
     echo "Usage: $PROGRAM MSGNAME"
     echo
@@ -343,6 +356,16 @@ PROGRAM=${0##*/}
 params=$(getopt -l 'bare,help,rebuild' -o 'b,h' -n "${0}" -- "$@") || exit 1
 
 eval set -- "$params"
+
+if hash pylint &>/dev/null; then
+    PYLINT=pylint
+elif hash pylint3 &>/dev/null; then
+    PYLINT=pylint3
+elif hash pylint2 &>/dev/null; then
+    PYLINT=pylint2
+else
+    PYLINT=
+fi
 
 bare=0 last=0 msgs=()
 
