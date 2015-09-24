@@ -204,18 +204,23 @@ error(){
 }
 
 query(){
-    local arg content results value
+    local arg output results value
     if [[ $LOADER = fresh ]]; then
-        content=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
+        output=$(pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; print msg, id }' | sort)
     elif [[ $LOADER = list ]]; then
-        content=$(content)
+        output=$(content)
     else
         error "Invalid LOADER configuration (update value in $0)"
         return 1
     fi
 
+    if [[ -z $output ]]; then
+        error "Unable to acquire any message data"
+        return 1
+    fi
+
     for arg in "$@"; do
-        value=$(awk -F: "/^$arg:/ { print \$2 }" <<<"$content")
+        value=$(awk -F: "/^$arg:/ { print \$2 }" <<<"$output")
         if [[ -n $value ]]; then
             if (( bare == 1 )); then
                 results+=("$value")
@@ -247,11 +252,14 @@ rebuild(){
     elif [[ $insert = $(content) ]]; then
         echo "INFO: Already up to date"
         exit 0
-    else
+    elif [[ -n $insert ]]; then
         echo "INFO: Rebuilding list now"
         echo
         diff <(echo "$insert") <(content)
         echo
+    else
+        error "Unable to parse output from pylint"
+        return 1
     fi
 
     cmd=$(cat <<-EOF
