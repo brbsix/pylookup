@@ -502,5 +502,5 @@ if __name__ == '__main__':
 
     print(*RESULTS, sep='\n')
 
-    if RESULTS < MSGNAMES:
+    if len(RESULTS) < len(MSGNAMES):
         sys.exit(1)
