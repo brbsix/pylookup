@@ -3,9 +3,7 @@
 # bash completion file for pylookup
 
 
-_have pylookup && {
-
-_pylookup(){
+__pylookup(){
     # local msgs=$(pylint --list-msgs 2>/dev/null | awk '/^:/ { sub("^:", "", $1); print $1 }' | sort)
     local msgs=$(cat <<-EOF
 		abstract-class-instantiated
@@ -190,6 +188,10 @@ _pylookup(){
     COMPREPLY=( $( compgen -W "$msgs" -- "${COMP_WORDS[COMP_CWORD]}" ) )
 }
 
-complete -F _pylookup pylookup
+for i in pylookup pylookup.py; do
+    if hash "$i" &>/dev/null; then
+        complete -F __pylookup "$i"
+    fi
+done
 
-}
+unset i
