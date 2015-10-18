@@ -267,7 +267,7 @@ class RebuildClass:
 
         postfix = """ --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf "    .%s.: .%s.,\\n", msg, id }' | sort | tr . \\' | sed '$ s/,//'"""
 
-        command = get_pylint + postfix
+        command = self.get_pylint + postfix
 
         self.data = subprocess.check_output(command,
                                             executable='bash',
