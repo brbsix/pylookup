@@ -269,7 +269,7 @@ rebuild(){
     fi
 
     cmd=$(cat <<-EOF
-	sed -n '1h; 1!H; \${;g;s/cat <<-EOF\n[^}\^]*EOF/cat <<-EOF\n$(tr '\n' '@' <<<"$insert" | sed 's/@/\\n/g')EOF/p;}' "$0"
+	sed -n '1h; 1!H; \${;g;s/cat <<EOF\n[^}\^]*EOF/cat <<EOF\n$(tr '\n' '@' <<<"$insert" | sed 's/@/\\n/g')EOF/p;}' "$0"
 	EOF
     )
 
