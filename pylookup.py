@@ -497,12 +497,11 @@ if __name__ == '__main__':
         help='rebuild the message list',
         nargs=0)
     PARSER.add_argument(
-        action='append',
         dest='msgnames',
         help=argparse.SUPPRESS,
         nargs='*')
     OPTIONS = PARSER.parse_args()
-    MSGNAMES = OPTIONS.msgnames[0]
+    MSGNAMES = OPTIONS.msgnames
 
     if not MSGNAMES:
         print("%s: missing operand" % __program__, file=sys.stderr)
