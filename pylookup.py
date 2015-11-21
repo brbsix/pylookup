@@ -16,8 +16,6 @@ __description__ = 'Display the pylint message id for a given message name.'
 # pylint --list-msgs 2>/dev/null | awk -F '[()]' $'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf "    \'%s\': \'%s\',\\n", msg, id }' | sort | sed '$ s/,$//'
 MSGLIST = {
     'abstract-class-instantiated': 'E0110',
-    'abstract-class-little-used': 'R0922',
-    'abstract-class-not-used': 'R0921',
     'abstract-method': 'W0223',
     'access-member-before-definition': 'E0203',
     'anomalous-backslash-in-string': 'W1401',
@@ -85,6 +83,7 @@ MSGLIST = {
     'interface-is-not-class': 'E0221',
     'interface-not-implemented': 'R0923',
     'invalid-all-object': 'E0604',
+    'invalid-characters-in-docstring': 'C0403',
     'invalid-format-index': 'W1307',
     'invalid-name': 'C0103',
     'invalid-sequence-index': 'E1126',
@@ -146,7 +145,6 @@ MSGLIST = {
     'return-in-init': 'E0101',
     'return-outside-function': 'E0104',
     'signature-differs': 'W0222',
-    'star-args': 'W0142',
     'superfluous-parens': 'C0325',
     'super-init-not-called': 'W0231',
     'suppressed-message': 'I0020',
@@ -172,6 +170,7 @@ MSGLIST = {
     'undefined-variable': 'E0602',
     'unexpected-keyword-arg': 'E1123',
     'unexpected-line-ending-format': 'C0328',
+    'unidiomatic-typecheck': 'W1504',
     'unnecessary-lambda': 'W0108',
     'unnecessary-pass': 'W0107',
     'unnecessary-semicolon': 'W0301',
