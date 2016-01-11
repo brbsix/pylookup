@@ -20,7 +20,6 @@ __pylookup(){
 	attribute-defined-outside-init
 	bad-builtin
 	bad-classmethod-argument
-	bad-context-manager
 	bad-continuation
 	bad-exception-context
 	bad-except-order
@@ -45,12 +44,18 @@ __pylookup(){
 	broad-except
 	catching-non-exception
 	cell-var-from-loop
+	confusing-with-statement
+	consider-using-enumerate
+	continue-in-finally
 	cyclic-import
 	dangerous-default-value
+	deprecated-method
 	deprecated-module
 	deprecated-pragma
 	duplicate-argument-name
+	duplicate-bases
 	duplicate-code
+	duplicate-except
 	duplicate-key
 	empty-docstring
 	eval-used
@@ -66,13 +71,11 @@ __pylookup(){
 	global-statement
 	global-variable-not-assigned
 	global-variable-undefined
-	ignored-builtin-module
 	import-error
 	import-self
+	inconsistent-mro
 	inherit-non-class
 	init-is-generator
-	interface-is-not-class
-	interface-not-implemented
 	invalid-all-object
 	invalid-characters-in-docstring
 	invalid-format-index
@@ -81,6 +84,8 @@ __pylookup(){
 	invalid-slice-index
 	invalid-slots
 	invalid-slots-object
+	invalid-star-assignment-target
+	invalid-unary-operand-type
 	line-too-long
 	locally-disabled
 	locally-enabled
@@ -93,34 +98,41 @@ __pylookup(){
 	lost-exception
 	method-check-failed
 	method-hidden
+	misplaced-bare-raise
+	misplaced-comparison-constant
+	misplaced-future
 	missing-docstring
 	missing-final-newline
 	missing-format-argument-key
 	missing-format-attribute
 	missing-format-string-key
-	missing-interface-method
 	missing-kwoa
-	missing-module-attribute
-	missing-reversed-argument
 	mixed-format-string
 	mixed-indentation
 	mixed-line-endings
+	multiple-imports
 	multiple-statements
+	no-classmethod-decorator
 	no-init
 	no-member
 	no-method-argument
 	no-name-in-module
 	nonexistent-operator
 	non-iterator-returned
+	nonlocal-and-global
+	nonlocal-without-binding
 	non-parent-init-called
 	no-self-argument
 	no-self-use
+	no-staticmethod-decorator
+	not-a-mapping
+	not-an-iterable
 	not-callable
+	not-context-manager
 	notimplemented-raised
 	not-in-loop
 	no-value-for-parameter
 	parse-error
-	pointless-except
 	pointless-statement
 	pointless-string-statement
 	protected-access
@@ -129,13 +141,18 @@ __pylookup(){
 	raw-checker-failed
 	redefined-builtin
 	redefined-outer-name
+	redefined-variable-type
 	redefine-in-handler
 	redundant-keyword-arg
 	redundant-unittest-assert
 	reimported
+	repeated-keyword
 	return-in-init
 	return-outside-function
 	signature-differs
+	simplifiable-if-statement
+	singleton-comparison
+	star-needs-assignment-target
 	superfluous-parens
 	super-init-not-called
 	suppressed-message
@@ -144,14 +161,17 @@ __pylookup(){
 	too-few-public-methods
 	too-many-ancestors
 	too-many-arguments
+	too-many-boolean-expressions
 	too-many-branches
 	too-many-format-args
 	too-many-function-args
 	too-many-instance-attributes
 	too-many-lines
 	too-many-locals
+	too-many-nested-blocks
 	too-many-public-methods
 	too-many-return-statements
+	too-many-star-expressions
 	too-many-statements
 	trailing-whitespace
 	truncated-format-string
@@ -161,14 +181,19 @@ __pylookup(){
 	undefined-variable
 	unexpected-keyword-arg
 	unexpected-line-ending-format
+	unexpected-special-method-signature
+	ungrouped-imports
 	unidiomatic-typecheck
 	unnecessary-lambda
 	unnecessary-pass
 	unnecessary-semicolon
+	unneeded-not
 	unpacking-non-sequence
 	unreachable
 	unrecognized-inline-option
-	unresolved-interface
+	unsubscriptable-object
+	unsupported-binary-operation
+	unsupported-membership-test
 	unused-argument
 	unused-format-string-argument
 	unused-format-string-key
@@ -178,7 +203,10 @@ __pylookup(){
 	used-before-assignment
 	useless-else-on-loop
 	useless-suppression
+	using-constant-test
 	wildcard-import
+	wrong-import-order
+	wrong-import-position
 	wrong-spelling-in-comment
 	wrong-spelling-in-docstring
 	yield-outside-function
