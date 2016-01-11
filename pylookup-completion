@@ -213,7 +213,7 @@ __pylookup(){
 	EOF
     )
 
-    COMPREPLY=( $( compgen -W "$msgs" -- "${COMP_WORDS[COMP_CWORD]}" ) )
+    readarray -t COMPREPLY < <(compgen -W "$msgs" -- "${COMP_WORDS[COMP_CWORD]}")
 }
 
 for i in pylookup pylookup.py; do
