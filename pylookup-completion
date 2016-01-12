@@ -4,7 +4,7 @@
 
 
 __pylookup(){
-    # local msgs=$(pylint --list-msgs 2>/dev/null | awk '/^:/ { sub("^:", "", $1); print $1 }' | sort)
+    # local msgs=$(pylint --list-msgs 2>/dev/null | awk '/^:/ { sub("^:", "", $1); print $1 }' | LC_ALL=C sort)
     local msgs=$(cat <<-EOF
 	abstract-class-instantiated
 	abstract-method
@@ -14,15 +14,15 @@ __pylookup(){
 	arguments-differ
 	assert-on-tuple
 	assigning-non-slot
-	assignment-from-none
 	assignment-from-no-return
+	assignment-from-none
 	astroid-error
 	attribute-defined-outside-init
 	bad-builtin
 	bad-classmethod-argument
 	bad-continuation
-	bad-exception-context
 	bad-except-order
+	bad-exception-context
 	bad-format-character
 	bad-format-string
 	bad-format-string-key
@@ -117,21 +117,21 @@ __pylookup(){
 	no-member
 	no-method-argument
 	no-name-in-module
-	nonexistent-operator
-	non-iterator-returned
-	nonlocal-and-global
-	nonlocal-without-binding
-	non-parent-init-called
 	no-self-argument
 	no-self-use
 	no-staticmethod-decorator
+	no-value-for-parameter
+	non-iterator-returned
+	non-parent-init-called
+	nonexistent-operator
+	nonlocal-and-global
+	nonlocal-without-binding
 	not-a-mapping
 	not-an-iterable
 	not-callable
 	not-context-manager
-	notimplemented-raised
 	not-in-loop
-	no-value-for-parameter
+	notimplemented-raised
 	parse-error
 	pointless-statement
 	pointless-string-statement
@@ -139,10 +139,10 @@ __pylookup(){
 	raising-bad-type
 	raising-non-exception
 	raw-checker-failed
+	redefine-in-handler
 	redefined-builtin
 	redefined-outer-name
 	redefined-variable-type
-	redefine-in-handler
 	redundant-keyword-arg
 	redundant-unittest-assert
 	reimported
@@ -153,8 +153,8 @@ __pylookup(){
 	simplifiable-if-statement
 	singleton-comparison
 	star-needs-assignment-target
-	superfluous-parens
 	super-init-not-called
+	superfluous-parens
 	suppressed-message
 	syntax-error
 	too-few-format-args

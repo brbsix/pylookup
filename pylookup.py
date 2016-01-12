@@ -13,7 +13,7 @@ __program__ = 'pylookup'
 __description__ = 'Display the pylint message id for a given message name.'
 
 
-# pylint --list-msgs 2>/dev/null | awk -F '[()]' $'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf "    \'%s\': \'%s\',\\n", msg, id }' | sort | sed '$ s/,$//'
+# pylint --list-msgs 2>/dev/null | awk -F '[()]' $'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf "    \'%s\': \'%s\',\\n", msg, id }' | LC_ALL=C sort | sed '$ s/,$//'
 MSGLIST = {
     'abstract-class-instantiated': 'E0110',
     'abstract-method': 'W0223',
@@ -23,15 +23,15 @@ MSGLIST = {
     'arguments-differ': 'W0221',
     'assert-on-tuple': 'W0199',
     'assigning-non-slot': 'E0237',
-    'assignment-from-none': 'E1128',
     'assignment-from-no-return': 'E1111',
+    'assignment-from-none': 'E1128',
     'astroid-error': 'F0002',
     'attribute-defined-outside-init': 'W0201',
     'bad-builtin': 'W0141',
     'bad-classmethod-argument': 'C0202',
     'bad-continuation': 'C0330',
-    'bad-exception-context': 'E0703',
     'bad-except-order': 'E0701',
+    'bad-exception-context': 'E0703',
     'bad-format-character': 'E1300',
     'bad-format-string-key': 'W1300',
     'bad-format-string': 'W1302',
@@ -91,8 +91,8 @@ MSGLIST = {
     'invalid-name': 'C0103',
     'invalid-sequence-index': 'E1126',
     'invalid-slice-index': 'E1127',
-    'invalid-slots': 'E0238',
     'invalid-slots-object': 'E0236',
+    'invalid-slots': 'E0238',
     'invalid-star-assignment-target': 'E0113',
     'invalid-unary-operand-type': 'E1130',
     'line-too-long': 'C0301',
@@ -126,21 +126,21 @@ MSGLIST = {
     'no-member': 'E1101',
     'no-method-argument': 'E0211',
     'no-name-in-module': 'E0611',
-    'nonexistent-operator': 'E0107',
-    'non-iterator-returned': 'E0301',
-    'nonlocal-and-global': 'E0115',
-    'nonlocal-without-binding': 'E0117',
-    'non-parent-init-called': 'W0233',
     'no-self-argument': 'E0213',
     'no-self-use': 'R0201',
     'no-staticmethod-decorator': 'R0203',
+    'no-value-for-parameter': 'E1120',
+    'non-iterator-returned': 'E0301',
+    'non-parent-init-called': 'W0233',
+    'nonexistent-operator': 'E0107',
+    'nonlocal-and-global': 'E0115',
+    'nonlocal-without-binding': 'E0117',
     'not-a-mapping': 'E1134',
     'not-an-iterable': 'E1133',
     'not-callable': 'E1102',
     'not-context-manager': 'E1129',
-    'notimplemented-raised': 'E0711',
     'not-in-loop': 'E0103',
-    'no-value-for-parameter': 'E1120',
+    'notimplemented-raised': 'E0711',
     'parse-error': 'F0010',
     'pointless-statement': 'W0104',
     'pointless-string-statement': 'W0105',
@@ -148,10 +148,10 @@ MSGLIST = {
     'raising-bad-type': 'E0702',
     'raising-non-exception': 'E0710',
     'raw-checker-failed': 'I0001',
+    'redefine-in-handler': 'W0623',
     'redefined-builtin': 'W0622',
     'redefined-outer-name': 'W0621',
     'redefined-variable-type': 'R0204',
-    'redefine-in-handler': 'W0623',
     'redundant-keyword-arg': 'E1124',
     'redundant-unittest-assert': 'W1503',
     'reimported': 'W0404',
@@ -162,8 +162,8 @@ MSGLIST = {
     'simplifiable-if-statement': 'R0102',
     'singleton-comparison': 'C0121',
     'star-needs-assignment-target': 'E0114',
-    'superfluous-parens': 'C0325',
     'super-init-not-called': 'W0231',
+    'superfluous-parens': 'C0325',
     'suppressed-message': 'I0020',
     'syntax-error': 'E0001',
     'too-few-format-args': 'E1306',
@@ -292,7 +292,7 @@ class RebuildClass:
     def check(self):
         """Check whether a rebuild is necessary."""
 
-        postfix = """ --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf "    .%s.: .%s.,\\n", msg, id }' | sort | tr . \\' | sed '$ s/,//'"""
+        postfix = """ --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf "    .%s.: .%s.,\\n", msg, id }' | LC_ALL=C sort | tr . \\' | sed '$ s/,//'"""
 
         command = self.get_pylint + postfix
 
@@ -398,7 +398,7 @@ def move(origin, destination):
 #     import tempfile
 #     import subprocess
 
-#     command = """pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf "    .%s.: .%s.,\\n", msg, id }' | sort | tr . \\' | sed '$ s/,//'"""
+#     command = """pylint --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf "    .%s.: .%s.,\\n", msg, id }' | LC_ALL=C sort | tr . \\' | sed '$ s/,//'"""
 
 #     process = subprocess.Popen(command, executable='bash',
 #                                         shell=True,
