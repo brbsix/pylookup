@@ -227,7 +227,7 @@ EOF
 }
 
 error(){
-    echo "ERROR: $@" >&2
+    echo "ERROR: $*" >&2
 }
 
 generate(){
