@@ -350,7 +350,7 @@ class RebuildClass:
         import re
         pattern = re.compile(r'^MSGLIST = {[^{^]*}', re.MULTILINE)
 
-        with open(__file__, 'rU') as fileobj:
+        with open(__file__) as fileobj:
             original = fileobj.read()
             self.replacement = pattern.sub('MSGLIST = {\n%s}' % self.data,
                                            original)
