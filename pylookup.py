@@ -349,15 +349,13 @@ class RebuildClass:
     def pylint(self):
         from distutils.spawn import find_executable
 
-        if find_executable('pylint'):
-            return 'pylint'
-        elif find_executable('pylint3'):
-            return 'pylint3'
-        elif find_executable('pylint2'):
-            return 'pylint2'
-        else:
-            logging.fatal('pylint is not installed')
-            sys.exit(1)
+        for ver in ['', '3', '2']:
+            pylint = 'pylint%s' % ver
+            if find_executable(pylint):
+                return pylint
+
+        logging.fatal('pylint is not installed')
+        sys.exit(1)
 
     def writetofile(self):
         from tempfile import NamedTemporaryFile
