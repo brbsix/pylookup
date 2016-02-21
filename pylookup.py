@@ -294,7 +294,7 @@ class RebuildClass:
 
         postfix = """ --list-msgs 2>/dev/null | awk -F '[()]' 'BEGIN{ OFS=":" } /^:/ { match($1, /^:(.+) /, a); msg=a[1]; id=$2; printf "    .%s.: .%s.,\\n", msg, id }' | LC_ALL=C sort | tr . \\' | sed '$ s/,//'"""
 
-        command = self.get_pylint + postfix
+        command = self.pylint + postfix
 
         self.data = subprocess.check_output(command,
                                             executable='bash',
@@ -332,20 +332,6 @@ class RebuildClass:
         # remove the backup
         remove(__file__ + self.bak)
 
-    @property
-    def get_pylint(self):
-        from distutils.spawn import find_executable
-
-        if find_executable('pylint'):
-            return 'pylint'
-        elif find_executable('pylint3'):
-            return 'pylint3'
-        elif find_executable('pylint2'):
-            return 'pylint2'
-        else:
-            logging.fatal("pylint is not installed")
-            sys.exit(1)
-
     def prepare(self):
         import re
         pattern = re.compile(r'^MSGLIST = {[^{^]*}', re.MULTILINE)
@@ -357,6 +343,20 @@ class RebuildClass:
 
         if self.replacement == original:
             logging.fatal("Rebuild failed... '%s' may be damaged", __file__)
+            sys.exit(1)
+
+    @property
+    def pylint(self):
+        from distutils.spawn import find_executable
+
+        if find_executable('pylint'):
+            return 'pylint'
+        elif find_executable('pylint3'):
+            return 'pylint3'
+        elif find_executable('pylint2'):
+            return 'pylint2'
+        else:
+            logging.fatal("pylint is not installed")
             sys.exit(1)
 
     def writetofile(self):
