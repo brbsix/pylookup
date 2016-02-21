@@ -356,7 +356,7 @@ class RebuildClass:
         elif find_executable('pylint2'):
             return 'pylint2'
         else:
-            logging.fatal("pylint is not installed")
+            logging.fatal('pylint is not installed')
             sys.exit(1)
 
     def writetofile(self):
