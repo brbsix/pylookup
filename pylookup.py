@@ -299,7 +299,8 @@ class RebuildClass:
         self.data = subprocess.check_output(command,
                                             executable='bash',
                                             shell=True,
-                                            stderr=subprocess.PIPE).decode()
+                                            stderr=subprocess.PIPE,
+                                            universal_newlines=True)
 
         if not self.data:
             logging.fatal('Unable to acquire messages necessary to rebuild')
