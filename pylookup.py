@@ -385,7 +385,7 @@ def chmod(path, reference):
 
 def execute(command):
     """Execute command."""
-    subprocess.check_output(command, executable='bash', shell=True)
+    subprocess.call(command, executable='bash', shell=True)
 
 
 def move(origin, destination):
