@@ -352,7 +352,8 @@ class RebuildClass:
 
         with open(__file__, 'rU') as fileobj:
             original = fileobj.read()
-            self.replacement = pattern.sub('MSGLIST = {\n%s}' % self.data, original)
+            self.replacement = pattern.sub('MSGLIST = {\n%s}' % self.data,
+                                           original)
 
         if self.replacement == original:
             logging.fatal("Rebuild failed... '%s' may be damaged", __file__)
