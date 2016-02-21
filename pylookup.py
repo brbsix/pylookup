@@ -436,7 +436,8 @@ if __name__ == '__main__':
 
     if not MSGNAMES:
         print("%s: missing operand" % __program__, file=sys.stderr)
-        print("Try '%s --help' for more information." % __program__, file=sys.stderr)
+        print("Try '%s --help' for more information." % __program__,
+              file=sys.stderr)
         sys.exit(1)
 
     PREFIX = '' if OPTIONS.bare else '# pylint: disable='
