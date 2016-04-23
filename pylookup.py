@@ -264,12 +264,12 @@ class RebuildClass:
         try:
             assert original_perms == current_perms
         except AssertionError:
-            fatalities.append("Failed to restore permissions for '%s'" % __file__)
+            fatalities.append('Failed to restore permissions for %r' % __file__)
 
         try:
             assert not os.path.isfile(__file__ + self.bak)
         except AssertionError:
-            fatalities.append("Failed to remove backup file '%s' after rebuild" % __file__ + self.bak)
+            fatalities.append('Failed to remove backup file %r after rebuild' % __file__ + self.bak)
 
         if fatalities:
             for msg in fatalities:
@@ -283,10 +283,10 @@ class RebuildClass:
         move(__file__, __file__ + self.bak)
 
         if not os.path.isfile(__file__ + self.bak):
-            logging.fatal("Unable to create backup file '%s' prior to rebuild", __file__ + self.bak)
+            logging.fatal('Unable to create backup file %r prior to rebuild', __file__ + self.bak)
             sys.exit(1)
         elif os.path.isfile(__file__):
-            logging.fatal("Unable to move '%s' prior to rebuild", __file__)
+            logging.fatal('Unable to move %r prior to rebuild', __file__)
             sys.exit(1)
 
     def check(self):
@@ -317,7 +317,7 @@ class RebuildClass:
     def exception(self):
         """Restore files to their original state in the event of an exception."""
 
-        logging.error("Rebuild of '%s' failed...", __file__)
+        logging.error('Failed to rebuild %r', __file__)
 
         # check if backup exists and restore it if so
         if os.path.isfile(__file__ + self.bak):
@@ -342,7 +342,7 @@ class RebuildClass:
                                            original)
 
         if self.replacement == original:
-            logging.fatal("Rebuild failed... '%s' may be damaged", __file__)
+            logging.fatal('Rebuild failed... %r may be damaged', __file__)
             sys.exit(1)
 
     @property
@@ -434,7 +434,7 @@ if __name__ == '__main__':
     MSGNAMES = OPTIONS.msgnames
 
     if not MSGNAMES:
-        print("%s: missing operand" % __program__, file=sys.stderr)
+        print('%s: missing operand' % __program__, file=sys.stderr)
         print("Try '%s --help' for more information." % __program__,
               file=sys.stderr)
         sys.exit(1)
