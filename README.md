@@ -13,7 +13,7 @@ To install, first choose whether you'd like to install the Bash shell version `p
 To install scripts locally (assuming `~/.local/bin` is on your PATH and `~/.bash_completion.d` is properly sourced):
 
     install pylookup ~/.local/bin
-	sudo install -m 0664 pylookup-completion ~/.bash_completion.d/pylookup
+    sudo install -m 0664 pylookup-completion ~/.bash_completion.d/pylookup
 
 
 Requirements
