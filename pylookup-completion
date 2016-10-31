@@ -4,8 +4,10 @@
 
 
 __pylookup(){
-    # local msgs=$(pylint --list-msgs 2>/dev/null | awk '/^:/ {sub("^:", "", $1); print $1}' | LC_ALL=C sort)
-    local msgs=$(cat <<-EOF
+    local msgs
+
+    # msgs=$(pylint --list-msgs 2>/dev/null | awk '/^:/ {sub("^:", "", $1); print $1}' | LC_ALL=C sort)
+    msgs=$(cat <<-EOF
 	abstract-class-instantiated
 	abstract-method
 	access-member-before-definition
